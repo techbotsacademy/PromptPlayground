@@ -71,7 +71,7 @@
     <header>
       <div class="eyebrow">Live · Private · In your browser</div>
       <h1>Face Detection</h1>
-      <p class="intro">See faces detected in your webcam stream, with a confidence score for each detection.</p>
+      <p class="intro">See faces detected in your webcam stream, with bounding boxes around each face.</p>
     </header>
 
     <section class="card" aria-label="Live face detection">
@@ -124,24 +124,6 @@
         statusDot.classList.toggle('live', live);
       }
 
-      function getConfidence(detection) {
-        // MediaPipe solution versions expose scores as either a number or an array.
-        // Also accept Tasks-style category scores to avoid silently showing 0%.
-        const candidates = [
-          detection.score,
-          detection.categories && detection.categories[0] && detection.categories[0].score,
-          detection.category && detection.category.score,
-          detection.confidence
-        ];
-        for (const candidate of candidates) {
-          const value = Array.isArray(candidate) || ArrayBuffer.isView(candidate)
-            ? candidate[0]
-            : candidate;
-          if (typeof value === 'number' && Number.isFinite(value)) return value;
-        }
-        return null;
-      }
-
       function clearOverlay() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         faceCount.textContent = '0';
@@ -152,8 +134,6 @@
         const detections = results.detections || [];
         faceCount.textContent = String(detections.length);
         ctx.lineWidth = Math.max(2, canvas.width / 400);
-        ctx.font = `600 ${Math.max(14, canvas.width / 48)}px system-ui, sans-serif`;
-        ctx.textBaseline = 'top';
 
         detections.forEach((detection) => {
           const box = detection.boundingBox;
@@ -162,18 +142,9 @@
           const y = box.yCenter * canvas.height - box.height * canvas.height / 2;
           const width = box.width * canvas.width;
           const height = box.height * canvas.height;
-          const confidence = getConfidence(detection);
-          const label = confidence === null ? 'N/A' : `${(confidence * 100).toFixed(1)}%`;
-          const labelWidth = ctx.measureText(label).width + 12;
-          const labelHeight = Math.max(23, canvas.width / 34);
 
           ctx.strokeStyle = '#6ee7c1';
-          ctx.fillStyle = '#6ee7c1';
           ctx.strokeRect(x, y, width, height);
-          const labelY = Math.max(0, y - labelHeight);
-          ctx.fillRect(x, labelY, labelWidth, labelHeight);
-          ctx.fillStyle = '#09251c';
-          ctx.fillText(label, x + 6, labelY + 3);
         });
         message.textContent = detections.length
           ? `${detections.length} ${detections.length === 1 ? 'face' : 'faces'} in view`
