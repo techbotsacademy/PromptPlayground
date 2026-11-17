@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101827">
-  <title>Face Detection using MediaPipe</title>
+  <title>Face Detection — MediaPipe</title>
   <style>
     :root {
       color-scheme: dark;
@@ -86,9 +86,6 @@
         <video id="video" autoplay muted playsinline aria-label="Webcam video"></video>
         <canvas id="overlay" aria-hidden="true"></canvas>
         <div class="placeholder" id="placeholder">
-          <span class="camera-icon" aria-hidden="true">◉</span>
-          <strong>Your camera preview will appear here</strong>
-          <span>Select Start Camera and allow camera access to begin.</span>
         </div>
       </div>
       <div class="stats">
@@ -132,7 +129,7 @@
       function drawDetections(results) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const detections = results.detections || [];
-        faceCount.textContent = String(detections.length);
+//        faceCount.textContent = String(detections.length);
         ctx.lineWidth = Math.max(2, canvas.width / 400);
 
         detections.forEach((detection) => {
