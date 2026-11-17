@@ -124,6 +124,24 @@
         statusDot.classList.toggle('live', live);
       }
 
+      function getConfidence(detection) {
+        // MediaPipe solution versions expose scores as either a number or an array.
+        // Also accept Tasks-style category scores to avoid silently showing 0%.
+        const candidates = [
+          detection.score,
+          detection.categories && detection.categories[0] && detection.categories[0].score,
+          detection.category && detection.category.score,
+          detection.confidence
+        ];
+        for (const candidate of candidates) {
+          const value = Array.isArray(candidate) || ArrayBuffer.isView(candidate)
+            ? candidate[0]
+            : candidate;
+          if (typeof value === 'number' && Number.isFinite(value)) return value;
+        }
+        return null;
+      }
+
       function clearOverlay() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         faceCount.textContent = '0';
@@ -144,8 +162,8 @@
           const y = box.yCenter * canvas.height - box.height * canvas.height / 2;
           const width = box.width * canvas.width;
           const height = box.height * canvas.height;
-          const confidence = detection.score && detection.score.length ? detection.score[0] : 0;
-          const label = `${(confidence * 100).toFixed(1)}%`;
+          const confidence = getConfidence(detection);
+          const label = confidence === null ? 'N/A' : `${(confidence * 100).toFixed(1)}%`;
           const labelWidth = ctx.measureText(label).width + 12;
           const labelHeight = Math.max(23, canvas.width / 34);
 
